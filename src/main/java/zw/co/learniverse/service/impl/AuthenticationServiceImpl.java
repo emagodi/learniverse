@@ -47,10 +47,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final EmailService emailService;
     @Override
     public AuthenticationResponse register(RegisterRequest request, boolean createdByAdmin, String token) {
-
-
         // Generate a random password
         String generatedPassword = generateRandomPassword(12); // Adjust length as needed
+
+        Long schoolId = null;
+
+        // If the user is created by an admin, get the admin's school ID
+        if (createdByAdmin && token != null) {
+            String username = jwtService.extractUserName(token);
+
+
+            System.out.println("TOKEN " + token);
+
+
+
+            User admin = userRepository.findByEmail(username).orElseThrow(() -> new AuthenticationException("Admin not found."));
+
+
+            System.out.println("ADMIN " + admin);
+
+            // Set schoolId from the admin's schoolId
+            schoolId = admin.getSchoolId();
+
+
+            System.out.println("SCHOOL ID " + schoolId);
+
+        } else {
+            // If not created by admin, use the provided schoolId
+            schoolId = request.getSchoolId();
+        }
 
         // Create a new User object based on the RegisterRequest with the generated password
         var user = User.builder()
@@ -60,8 +85,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accessNumber(request.getAccessNumber())
                 .password(passwordEncoder.encode(generatedPassword)) // Save the encoded generated password
                 .role(request.getRole())
-                .schoolId(request.getSchoolId())
-                .temporaryPassword(true)
+                .schoolId(schoolId) // Set the schoolId based on the admin or request
+                .temporaryPassword(true) // Set the temporary password flag
                 .build();
 
         // Save the user to the repository
@@ -96,7 +121,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .id(user.getId())
                 .firstname(user.getFirstname())
                 .lastname(user.getLastname())
-                .password(generatedPassword)
+                .password(generatedPassword) // Optionally include the generated password in the response
                 .accessNumber(user.getAccessNumber())
                 .refreshToken(refreshToken.getToken())
                 .roles(roles)
