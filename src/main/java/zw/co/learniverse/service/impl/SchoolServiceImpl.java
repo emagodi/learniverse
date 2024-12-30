@@ -20,9 +20,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import zw.co.learniverse.entities.School;
+import zw.co.learniverse.entities.*;
+
 import java.io.File;
+
+import zw.co.learniverse.enums.OwnershipType;
+import zw.co.learniverse.enums.Status;
+import zw.co.learniverse.exception.*;
+import zw.co.learniverse.payload.request.LevelGradeRequest;
+import zw.co.learniverse.payload.request.LevelIdRequest;
+import zw.co.learniverse.payload.request.SchoolClassRequest;
 import zw.co.learniverse.payload.request.SchoolRequest;
+import zw.co.learniverse.payload.response.ClassResponse;
+import zw.co.learniverse.payload.response.SubjectResponse;
 import zw.co.learniverse.repository.SchoolClassRepository;
 import zw.co.learniverse.repository.SchoolRepository;
 import zw.co.learniverse.service.SchoolService;
@@ -254,63 +264,63 @@ public class SchoolServiceImpl implements SchoolService {
 //
 //
 //    @Override
-//    public List<SubjectResponse> getAllSubjectFromSchool(Long schoolId){
-//
-//        School school = schoolRepository.findById(schoolId).orElse(null);
-//
-//        if(school == null){
-//           throw new SchoolNotFoundException("School with id:: "+schoolId+" not found");
-//        }
-//        var subjects = school.getSubjects();
-//        return  subjects.stream().map(subjects1 -> SubjectResponse.builder()
-//                .subjectName(subjects1.getSubjectName())
-//                .build()).collect(Collectors.toList());
-//    }
-//
-//    @Override
-//    public List<LevelGrade> getAllLevelsFromSchool(Long schoolId){
-//
-//        School school = schoolRepository.findById(schoolId).orElse(null);
-//
-//        if(school == null){
-//            throw new SchoolNotFoundException("School with id:: "+schoolId+" not found");
-//        }
-//        return  school.getLevelGrade();
-//    }
-//
-//    @Override
-//    public LevelGrade getAllLevelsFromSchoolByName(Long schoolId, String levelName){
-//
-//        School school = schoolRepository.findById(schoolId).orElse(null);
-//
-//        if(school == null){
-//            throw new SchoolNotFoundException("School with id:: "+schoolId+" not found");
-//        }
-//        return  school.getLevelGrade().stream().filter(e -> levelName.equals(e.getName())).findFirst().orElseThrow(() -> new LevelNotFoundException("Level "+levelName+" not found!!!"));
-//    }
-//
-//
-//    public String createSubject(Long schoolId,String className){
-//        School school = schoolRepository.findById(schoolId).orElse(null);
-//
-//        if(school == null){
-//            throw new RuntimeException("School not found");
-//        }
-//return "222";
-//    }
-//
-//    @Override
-//    public List<ClassResponse> getAllClassesFromSchool(Long schoolId){
-//
-//        School school = schoolRepository.findById(schoolId).orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        var classes = school.getSchoolClass();
-//        return  classes.stream().map(class1 -> ClassResponse.builder()
-//                .classId(class1.getSchoolClassId())
-//                .className(class1.getName())
-//                .build()).collect(Collectors.toList());
-//    }
-//
+    public List<SubjectResponse> getAllSubjectFromSchool(Long schoolId){
+
+        School school = schoolRepository.findById(schoolId).orElse(null);
+
+        if(school == null){
+           throw new SchoolNotFoundException("School with id:: "+schoolId+" not found");
+        }
+        var subjects = school.getSubjects();
+        return  subjects.stream().map(subjects1 -> SubjectResponse.builder()
+                .subjectName(subjects1.getSubjectName())
+                .build()).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LevelGrade> getAllLevelsFromSchool(Long schoolId){
+
+        School school = schoolRepository.findById(schoolId).orElse(null);
+
+        if(school == null){
+            throw new SchoolNotFoundException("School with id:: "+schoolId+" not found");
+        }
+        return  school.getLevelGrade();
+    }
+
+    @Override
+    public LevelGrade getAllLevelsFromSchoolByName(Long schoolId, String levelName){
+
+        School school = schoolRepository.findById(schoolId).orElse(null);
+
+        if(school == null){
+            throw new SchoolNotFoundException("School with id:: "+schoolId+" not found");
+        }
+        return  school.getLevelGrade().stream().filter(e -> levelName.equals(e.getName())).findFirst().orElseThrow(() -> new LevelNotFoundException("Level "+levelName+" not found!!!"));
+    }
+
+
+    public String createSubject(Long schoolId,String className){
+        School school = schoolRepository.findById(schoolId).orElse(null);
+
+        if(school == null){
+            throw new RuntimeException("School not found");
+        }
+return "222";
+    }
+
+    @Override
+    public List<ClassResponse> getAllClassesFromSchool(Long schoolId){
+
+        School school = schoolRepository.findById(schoolId).orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        var classes = school.getSchoolClass();
+        return  classes.stream().map(class1 -> ClassResponse.builder()
+                .classId(class1.getSchoolClassId())
+                .className(class1.getName())
+                .build()).collect(Collectors.toList());
+    }
+
 //
 //    // Method to generate the registration number
 //    public String generateBsNumber(String town, String schoolName) {
@@ -431,843 +441,843 @@ public class SchoolServiceImpl implements SchoolService {
 ////        School updateSchool  = schoolRepository.save(existingSchool);
 ////        return updateSchool;
 ////    }
-//
-//
-//
-//
-//
-//
-//    @Override
-//    public Page<School > getAllSchoolsByDistrict(String district, int page, int size) {
-//        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//
-//        Page<School>  schoolsPage = schoolRepository.findByDistrict(district, pageable);
-//
-//        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
-//
-//        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
-//
-//        return pages;
-//    }
-//
-//    public void validateGradingScales(List<GradingScale> newScales, List<GradingScale> existingScales) {
-//        // Combine existing and new scales for validation
-//        List<GradingScale> allScales = new ArrayList<>(existingScales);
-//        allScales.addAll(newScales);
-//
-//        // Sort by minScore
-//        allScales.sort(Comparator.comparingDouble(GradingScale::getMinScore));
-//
-//        // Check for overlapping ranges
-//        for (int i = 0; i < allScales.size() - 1; i++) {
-//            GradingScale current = allScales.get(i);
-//            GradingScale next = allScales.get(i + 1);
-//
-//            if (current.getMaxScore() > next.getMinScore()) {
-//                throw new IllegalArgumentException("Grading scales overlap between "
-//                        + current.getGrade() + " and " + next.getGrade());
-//            }
-//        }
-//
-//        // Check for duplicate grades
-//        Set<String> grades = new HashSet<>();
-//        for (GradingScale scale : allScales) {
-//            if (!grades.add(scale.getGrade())) {
-//                throw new IllegalArgumentException("Duplicate grade: " + scale.getGrade());
-//            }
-//        }
-//    }
-//
-//
-//
-//    @Override
-//    @Transactional
-//    public LevelGrade insertGradingScale(Long schoolId, UUID levelGradeId, List<GradingScale> gradingScale) {
+
+
+
+
+
+
+    @Override
+    public Page<School > getAllSchoolsByDistrict(String district, int page, int size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<School>  schoolsPage = schoolRepository.findByDistrict(district, pageable);
+
+        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
+
+        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
+
+        return pages;
+    }
+
+    public void validateGradingScales(List<GradingScale> newScales, List<GradingScale> existingScales) {
+        // Combine existing and new scales for validation
+        List<GradingScale> allScales = new ArrayList<>(existingScales);
+        allScales.addAll(newScales);
+
+        // Sort by minScore
+        allScales.sort(Comparator.comparingDouble(GradingScale::getMinScore));
+
+        // Check for overlapping ranges
+        for (int i = 0; i < allScales.size() - 1; i++) {
+            GradingScale current = allScales.get(i);
+            GradingScale next = allScales.get(i + 1);
+
+            if (current.getMaxScore() > next.getMinScore()) {
+                throw new IllegalArgumentException("Grading scales overlap between "
+                        + current.getGrade() + " and " + next.getGrade());
+            }
+        }
+
+        // Check for duplicate grades
+        Set<String> grades = new HashSet<>();
+        for (GradingScale scale : allScales) {
+            if (!grades.add(scale.getGrade())) {
+                throw new IllegalArgumentException("Duplicate grade: " + scale.getGrade());
+            }
+        }
+    }
+
+
+
+    @Override
+    @Transactional
+    public LevelGrade insertGradingScale(Long schoolId, UUID levelGradeId, List<GradingScale> gradingScale) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new RuntimeException("School not found"));
+
+       LevelGrade levelGrade = existingSchool.getLevelGrade().stream().filter(level -> levelGradeId.equals(level.getLevelGradeId()))
+               .findAny()
+               .orElseThrow(() -> new RuntimeException("Level with the specified id not found"));
+
+
+        List<GradingScale> existingScales = levelGrade.getGradingScales();
+
+        // Validate against existing scales
+        validateGradingScales(gradingScale, existingScales);
+        levelGrade.setGradingScales(gradingScale);
+
+        schoolRepository.save(existingSchool);
+        return levelGrade;
+    }
+
+//    public LevelGrade updateGradingScale(Long schoolId, UUID levelGradeId, Map<String, Integer> gradingScale) {
 //        School existingSchool = schoolRepository.findById(schoolId)
 //                .orElseThrow(() -> new RuntimeException("School not found"));
 //
-//       LevelGrade levelGrade = existingSchool.getLevelGrade().stream().filter(level -> levelGradeId.equals(level.getLevelGradeId()))
-//               .findAny()
-//               .orElseThrow(() -> new RuntimeException("Level with the specified id not found"));
-//
-//
-//        List<GradingScale> existingScales = levelGrade.getGradingScales();
-//
-//        // Validate against existing scales
-//        validateGradingScales(gradingScale, existingScales);
-//        levelGrade.setGradingScales(gradingScale);
-//
+//        LevelGrade levelGrade = existingSchool.getLevelGrade().stream().filter(level -> levelGradeId.equals(level.getLevelGradeId()))
+//                .findAny()
+//                .orElseThrow(() -> new RuntimeException("Level with the specified id not found"));
+//        levelGrade.setGradingScale(gradingScale);
 //        schoolRepository.save(existingSchool);
 //        return levelGrade;
 //    }
-//
-////    public LevelGrade updateGradingScale(Long schoolId, UUID levelGradeId, Map<String, Integer> gradingScale) {
-////        School existingSchool = schoolRepository.findById(schoolId)
-////                .orElseThrow(() -> new RuntimeException("School not found"));
-////
-////        LevelGrade levelGrade = existingSchool.getLevelGrade().stream().filter(level -> levelGradeId.equals(level.getLevelGradeId()))
-////                .findAny()
-////                .orElseThrow(() -> new RuntimeException("Level with the specified id not found"));
-////        levelGrade.setGradingScale(gradingScale);
-////        schoolRepository.save(existingSchool);
-////        return levelGrade;
-////    }
-//
-//
-//    @Override
-//    public Page<School> getAllSchoolsByTown(String town, int page, int size) {
-//        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//
-//        Page<School>  schoolsPage = schoolRepository.findByTown(town, pageable);
-//
-//        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
-//
-//        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
-//
-//        return pages;
-//    }
-//
-//    @Override
-//    public Page<School > getAllSchoolsByProvince(String province, int page, int size) {
-//        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//
-//        Page<School>  schoolsPage = schoolRepository.findByProvince(province, pageable);
-//
-//        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
-//
-//        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
-//
-//        return pages;
-//    }
-//
-//
-//    @Override
-//    public Page<School> getAllSchoolsByCountry(String country, int page, int size) {
-//        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//
-//        Page<School>  schoolsPage = schoolRepository.findByCountry(country, pageable);
-//
-//        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
-//
-//        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
-//
-//        return pages;
-//    }
-//
-//
-//    @Override
-//    public Page<School> getAllSchoolsByStatus(Status status, int page, int size) {
-//        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//
-//        Page<School>  schoolsPage = schoolRepository.findByStatus(status, pageable);
-//
-//        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
-//
-//        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
-//
-//        return pages;
-//    }
-//
-//
-//    @Override
-//    public Page<School> getAllSchoolsByOwnershipType(OwnershipType ownershipType, int page, int size) {
-//        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//
-//        Page<School>  schoolsPage = schoolRepository.findByOwnershipType(ownershipType, pageable);
-//
-//        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
-//
-//        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
-//
-//        return pages;
-//    }
-//
-//    public School getSchoolById(Long id) {
-//        return schoolRepository.findById(id).orElse(null);
-//    }
-//
-//    @Transactional
-//    @Override
-//    public String addSubjectsToClass(Long schoolId, String classId, List<String> subjectIds) {
+
+
+    @Override
+    public Page<School> getAllSchoolsByTown(String town, int page, int size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<School>  schoolsPage = schoolRepository.findByTown(town, pageable);
+
+        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
+
+        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
+
+        return pages;
+    }
+
+    @Override
+    public Page<School > getAllSchoolsByProvince(String province, int page, int size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<School>  schoolsPage = schoolRepository.findByProvince(province, pageable);
+
+        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
+
+        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
+
+        return pages;
+    }
+
+
+    @Override
+    public Page<School> getAllSchoolsByCountry(String country, int page, int size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<School>  schoolsPage = schoolRepository.findByCountry(country, pageable);
+
+        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
+
+        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
+
+        return pages;
+    }
+
+
+    @Override
+    public Page<School> getAllSchoolsByStatus(Status status, int page, int size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<School>  schoolsPage = schoolRepository.findByStatus(status, pageable);
+
+        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
+
+        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
+
+        return pages;
+    }
+
+
+    @Override
+    public Page<School> getAllSchoolsByOwnershipType(OwnershipType ownershipType, int page, int size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<School>  schoolsPage = schoolRepository.findByOwnershipType(ownershipType, pageable);
+
+        List<School> filteredSchools = new ArrayList<>(schoolsPage.getContent());
+
+        Page<School> pages = new PageImpl<>(filteredSchools, pageable, schoolsPage.getTotalElements());
+
+        return pages;
+    }
+
+    public School getSchoolById(Long id) {
+        return schoolRepository.findById(id).orElse(null);
+    }
+
+    @Transactional
+    @Override
+    public String addSubjectsToClass(Long schoolId, String classId, List<String> subjectIds) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new RuntimeException("School not found"));
+
+        UUID classUuid;
+        List<UUID> subjectUuidList = convertToUUIDList(subjectIds);
+
+        try {
+            classUuid = UUID.fromString(classId);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid UUID format", e);
+        }
+        Set<UUID> existingSubjectIds = existingSchool.getSubjects().stream()
+                .map(Subjects::getSubjectId)
+                .collect(Collectors.toSet());
+
+        List<UUID> invalidSubjects = subjectUuidList.stream()
+                .filter(subjectId -> !existingSubjectIds.contains(subjectId))
+                .toList();
+
+        if (!invalidSubjects.isEmpty()) {
+            throw new RuntimeException("Invalid subject IDs: " + invalidSubjects);
+        }
+
+        SchoolClass schoolClass = existingSchool.getSchoolClass().stream()
+                .filter(sc -> sc.getSchoolClassId().equals(classUuid))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Class not found"));
+// Filter and add valid subjects
+        Set<UUID> currentSubjects = schoolClass.getSubjects();
+        if (currentSubjects == null) {
+            currentSubjects = new HashSet<>();
+            schoolClass.setSubjects(currentSubjects);
+        }
+
+        subjectUuidList.stream()
+                .filter(existingSubjectIds::contains)
+                .forEach(currentSubjects::add);
+
+        schoolRepository.save(existingSchool);
+
+        return "Class with id: " + classId + " is successfully updated with subjects.";
+    }
+
+    public List<UUID> convertToUUIDList(List<String> stringList) {
+        return stringList.stream()
+                .map(str -> {
+                    try {
+                        return UUID.fromString(str);
+                    } catch (IllegalArgumentException e) {
+                        // Handle the invalid UUID case, e.g., log the error or return null
+                        System.out.println("Invalid UUID: " + str);
+                        return null; // Or handle differently
+                    }
+                })
+                .filter(uuid -> uuid != null) // Remove nulls from the list
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public String addDepartmentToClass(Long schoolId, String classId, String departmentId) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new RuntimeException("School not found"));
+        UUID classUuid;
+        UUID departmentUuid;
+
+        try {
+            classUuid = UUID.fromString(classId);
+            departmentUuid = UUID.fromString(departmentId);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid UUID format", e);
+        }
+
+        existingSchool.getSchoolClass().stream()
+                .filter(sc -> sc.getSchoolClassId().equals(classUuid))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Class not found"))
+                .setDepartmentId(departmentUuid);
+        ;
+
+        schoolRepository.save(existingSchool);
+
+        return "Class with id:: "+ classId + " is successfully added to department with id:: "+ departmentId;
+    }
+
+    @Transactional
+    @Override
+    public String addSubjectToClass(Long schoolId, String classId, String subjectId) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new RuntimeException("School not found"));
+
+        UUID classUuid;
+        UUID subjectUuid;
+
+        try {
+            classUuid = UUID.fromString(classId);
+            subjectUuid = UUID.fromString(subjectId);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid UUID format", e);
+        }
+
+       boolean isPresent = existingSchool.getSubjects().stream()
+                .anyMatch(subject -> subject.getSubjectId().equals(subjectUuid))
+                ;
+
+        if (!isPresent) {
+            throw new RuntimeException("Invalid subject ID: " + subjectId);
+        }
+
+        existingSchool.getSchoolClass().stream()
+                .filter(sc -> sc.getSchoolClassId().equals(classUuid))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Class not found"))
+                .getSubjects().add(subjectUuid)
+        ;
+
+        schoolRepository.save(existingSchool);
+
+        return "Subject with id:: "+ subjectId + " is successfully added to class with id:: "+ classId;
+    }
+
+
+    @Transactional
+    @Override
+    public List<Department> addDepartment(Long schoolId, List<Department> departmentList) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new RuntimeException("School not found"));
+
+        existingSchool.getDepartments().addAll(departmentList);
+        schoolRepository.save(existingSchool);
+
+        return existingSchool.getDepartments();
+    }
+
+    @Override
+    public List<Department> getDepartmentsBySchool(Long schoolId) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        return existingSchool.getDepartments();
+    }
+
+    @Override
+    public Department getDepartmentsBySchool(Long schoolId, String deptName) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        return existingSchool.getDepartments().stream().filter(d -> deptName.equalsIgnoreCase(d.getName())).findFirst().orElseThrow(() -> new DepartmentNotFound("Department "+deptName+" not found"));
+    }
+
+    @Transactional
+    @Override
+    public List<Department> editDepartmentByName(Long schoolId, String currentName, Department updatedDepartment) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new RuntimeException("School not found"));
+
+        for (Department department : existingSchool.getDepartments()) {
+            if (department.getName().equals(currentName)) {
+                copyNonNullProperties(updatedDepartment, department);
+                break;
+            }
+        }
+
+        schoolRepository.save(existingSchool);
+        return existingSchool.getDepartments();
+    }
+
+    @Transactional
+    @Override
+    public List<Department> removeDepartmentByName(Long schoolId, String name) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new RuntimeException("School not found"));
+
+        existingSchool.getDepartments().removeIf(department -> department.getName().equals(name));
+        schoolRepository.save(existingSchool);
+
+        return existingSchool.getDepartments();
+    }
+
+
+
+    private SchoolClass mapToSchoolCLass(SchoolClassRequest schoolClassRequest){
+        UUID levelUuid;
+
+        try {
+            levelUuid = UUID.fromString(schoolClassRequest.getLevelId());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid UUID format", e);
+        }
+        return SchoolClass.builder()
+                .name(schoolClassRequest.getName())
+                .description(schoolClassRequest.getDescription())
+                .schoolClassId(UUID.randomUUID())
+                .levelId(levelUuid)
+                .build();
+    }
+    @Transactional
+    @Override
+    public List<SchoolClass> addSchoolClass(Long schoolId, List<SchoolClassRequest> schoolClassList) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new RuntimeException("School not found"));
+
+        List<SchoolClass> schoolClasses = schoolClassList.stream()
+                .map(this::mapToSchoolCLass)
+                .peek(schoolClass -> {
+                    schoolClass.setSchool(existingSchool); // Set the actual School object
+                })
+                .toList();
+
+        schoolClasses.forEach(schoolClass -> {
+            existingSchool.getSchoolClass().add(schoolClass);
+        });
+
+
+        return schoolRepository.save(existingSchool).getSchoolClass();
+    }
+
+    @Transactional
+    @Override
+    public List<SchoolClass> editSchoolClassByName(Long schoolId, String currentName, SchoolClass updatedSchoolClass) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() ->  new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        for (SchoolClass schoolClass : existingSchool.getSchoolClass()) {
+            if (schoolClass.getName().equals(currentName)) {
+                copyNonNullProperties(updatedSchoolClass, schoolClass);
+                break;
+            }
+        }
+
+        schoolRepository.save(existingSchool);
+        return existingSchool.getSchoolClass();
+    }
+
+
+    @Override
+    public SchoolClass gettSchoolClassByName(Long schoolId, String name) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() ->  new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        return existingSchool.getSchoolClass().stream().filter(c -> name.equalsIgnoreCase(c.getName())).findFirst().orElseThrow(() -> new EntityNotFoundException("Class "+name+" not found"));
+    }
+
+
+    @Transactional
+    @Override
+    public List<SchoolClass> removeSchoolClassByName(Long schoolId, String name) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        existingSchool.getSchoolClass().removeIf(schoolClass -> schoolClass.getName().equals(name));
+        schoolRepository.save(existingSchool);
+
+        return existingSchool.getSchoolClass();
+    }
+
+
+    @Transactional
+    @Override
+    public List<LevelGrade> addLevelGrade(Long schoolId, LevelGradeRequest request) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        validateGradingScales(request.getGradingScales());
+
+        LevelGrade levelGrade = new LevelGrade();
+        levelGrade.setName(request.getName());
+        levelGrade.setDescription(request.getDescription());
+        levelGrade.setGradingScales(request.getGradingScales());
+        levelGrade.setSchool(existingSchool);
+
+        existingSchool.getLevelGrade().add(levelGrade);
+        schoolRepository.save(existingSchool);
+
+        return existingSchool.getLevelGrade();
+    }
+
+    private void validateGradingScales(List<GradingScale> gradingScales) {
+        gradingScales.sort(Comparator.comparingDouble(GradingScale::getMinScore));
+
+        for (int i = 0; i < gradingScales.size() - 1; i++) {
+            GradingScale current = gradingScales.get(i);
+            GradingScale next = gradingScales.get(i + 1);
+
+            if (current.getMaxScore() > next.getMinScore()) {
+                throw new IllegalArgumentException("Grading scales overlap between "
+                        + current.getGrade() + " and " + next.getGrade());
+            }
+        }
+
+        Set<String> grades = new HashSet<>();
+        for (GradingScale scale : gradingScales) {
+            if (!grades.add(scale.getGrade())) {
+                throw new IllegalArgumentException("Duplicate grade: " + scale.getGrade());
+            }
+        }
+    }
+
+
+    @Transactional
+    @Override
+    public List<LevelGrade> editLevelGradeByName(Long schoolId, String currentName, LevelGrade updatedLevelGrade) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        for (LevelGrade levelGrade : existingSchool.getLevelGrade()) {
+            if (levelGrade.getName().equals(currentName)) {
+                copyNonNullProperties(updatedLevelGrade, levelGrade);
+                break;
+            }
+        }
+
+        schoolRepository.save(existingSchool);
+        return existingSchool.getLevelGrade();
+    }
+
+    @Transactional
+    @Override
+    public List<LevelGrade> removeLevelGradeByName(Long schoolId, String name) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        existingSchool.getLevelGrade().removeIf(levelGrade -> levelGrade.getName().equals(name));
+        schoolRepository.save(existingSchool);
+
+        return existingSchool.getLevelGrade();
+    }
+
+
+    @Transactional
+    @Override
+    public List<Subjects> addSubject(Long schoolId, List<Subjects> subjectList) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        existingSchool.getSubjects().addAll(subjectList);
+        schoolRepository.save(existingSchool);
+
+        return existingSchool.getSubjects();
+    }
+
+    @Transactional
+    @Override
+    public List<Subjects> editSubjectByName(Long schoolId, String currentName, Subjects updatedSubject) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        for (Subjects subject : existingSchool.getSubjects()) {
+            if (subject.getSubjectName().equals(currentName)) {
+                copyNonNullProperties(updatedSubject, subject);
+                break;
+            }
+        }
+
+        schoolRepository.save(existingSchool);
+        return existingSchool.getSubjects();
+    }
+
+    @Override
+    public Subjects getSubjectByName(Long schoolId, String name) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        return existingSchool.getSubjects().stream().filter(s -> name.equalsIgnoreCase(s.getSubjectName())).findFirst().orElseThrow(() -> new SubjectNotFoundException("Subject "+ name+" not found!"));
+    }
+
+    @Override
+    public List<Subjects> getAllSubjectsBySchool(Long schoolId) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        return existingSchool.getSubjects();
+    }
+
+
+    @Transactional
+    @Override
+    public List<Subjects> removeSubjectByName(Long schoolId, String name) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        existingSchool.getSubjects().removeIf(subject -> subject.getSubjectName().equals(name));
+        schoolRepository.save(existingSchool);
+
+        return existingSchool.getSubjects();
+    }
+
+
+    @Transactional
+    @Override
+    public List<SchoolTerm> addSchoolTerm(Long schoolId, List<SchoolTerm> schoolTermList) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        existingSchool.getSchoolTerms().addAll(schoolTermList);
+        schoolRepository.save(existingSchool);
+
+        return existingSchool.getSchoolTerms();
+    }
+
+    @Override
+    public List<SchoolTerm> getSchoolAllSchoolTerms(Long schoolId) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        return existingSchool.getSchoolTerms();
+    }
+
+    @Override
+    public SchoolTerm getSchoolAllSchoolTermByName(Long schoolId, String termName) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        return existingSchool.getSchoolTerms().stream().filter(e -> termName.equalsIgnoreCase(e.getName())).findFirst().orElseThrow(() -> new TermNotFoundException("Term "+termName+" not found."));
+    }
+
+    @Transactional
+    @Override
+    public List<SchoolTerm> editSchoolTermByName(Long schoolId, String currentName, SchoolTerm updatedSchoolTerm) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        for (SchoolTerm schoolTerm : existingSchool.getSchoolTerms()) {
+            if (schoolTerm.getName().equals(currentName)) {
+                copyNonNullProperties(updatedSchoolTerm, schoolTerm);
+                break;
+            }
+        }
+
+        schoolRepository.save(existingSchool);
+        return existingSchool.getSchoolTerms();
+    }
+
+    @Transactional
+    @Override
+    public List<SchoolTerm> removeSchoolTermByName(Long schoolId, String name) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        existingSchool.getSchoolTerms().removeIf(schoolTerm -> schoolTerm.getName().equals(name));
+        schoolRepository.save(existingSchool);
+
+        return existingSchool.getSchoolTerms();
+    }
+
+    @Transactional
+    @Override
+    public List<AcademicYear> addAcademicYear(Long schoolId, List<AcademicYear> academicYearList) {
 //        School existingSchool = schoolRepository.findById(schoolId)
 //                .orElseThrow(() -> new RuntimeException("School not found"));
 //
-//        UUID classUuid;
-//        List<UUID> subjectUuidList = convertToUUIDList(subjectIds);
-//
-//        try {
-//            classUuid = UUID.fromString(classId);
-//        } catch (IllegalArgumentException e) {
-//            throw new RuntimeException("Invalid UUID format", e);
-//        }
-//        Set<UUID> existingSubjectIds = existingSchool.getSubjects().stream()
-//                .map(Subjects::getSubjectId)
-//                .collect(Collectors.toSet());
-//
-//        List<UUID> invalidSubjects = subjectUuidList.stream()
-//                .filter(subjectId -> !existingSubjectIds.contains(subjectId))
-//                .toList();
-//
-//        if (!invalidSubjects.isEmpty()) {
-//            throw new RuntimeException("Invalid subject IDs: " + invalidSubjects);
-//        }
-//
-//        SchoolClass schoolClass = existingSchool.getSchoolClass().stream()
-//                .filter(sc -> sc.getSchoolClassId().equals(classUuid))
-//                .findFirst()
-//                .orElseThrow(() -> new RuntimeException("Class not found"));
-//// Filter and add valid subjects
-//        Set<UUID> currentSubjects = schoolClass.getSubjects();
-//        if (currentSubjects == null) {
-//            currentSubjects = new HashSet<>();
-//            schoolClass.setSubjects(currentSubjects);
-//        }
-//
-//        subjectUuidList.stream()
-//                .filter(existingSubjectIds::contains)
-//                .forEach(currentSubjects::add);
-//
+//        existingSchool.getAcademicYears().addAll(academicYearList);
 //        schoolRepository.save(existingSchool);
 //
-//        return "Class with id: " + classId + " is successfully updated with subjects.";
-//    }
-//
-//    public List<UUID> convertToUUIDList(List<String> stringList) {
-//        return stringList.stream()
-//                .map(str -> {
-//                    try {
-//                        return UUID.fromString(str);
-//                    } catch (IllegalArgumentException e) {
-//                        // Handle the invalid UUID case, e.g., log the error or return null
-//                        System.out.println("Invalid UUID: " + str);
-//                        return null; // Or handle differently
-//                    }
-//                })
-//                .filter(uuid -> uuid != null) // Remove nulls from the list
-//                .collect(Collectors.toList());
-//    }
-//
-//    @Transactional
-//    @Override
-//    public String addDepartmentToClass(Long schoolId, String classId, String departmentId) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new RuntimeException("School not found"));
-//        UUID classUuid;
-//        UUID departmentUuid;
-//
-//        try {
-//            classUuid = UUID.fromString(classId);
-//            departmentUuid = UUID.fromString(departmentId);
-//        } catch (IllegalArgumentException e) {
-//            throw new RuntimeException("Invalid UUID format", e);
-//        }
-//
-//        existingSchool.getSchoolClass().stream()
-//                .filter(sc -> sc.getSchoolClassId().equals(classUuid))
-//                .findFirst()
-//                .orElseThrow(() -> new RuntimeException("Class not found"))
-//                .setDepartmentId(departmentUuid);
-//        ;
-//
-//        schoolRepository.save(existingSchool);
-//
-//        return "Class with id:: "+ classId + " is successfully added to department with id:: "+ departmentId;
-//    }
-//
-//    @Transactional
-//    @Override
-//    public String addSubjectToClass(Long schoolId, String classId, String subjectId) {
+//        return existingSchool.getAcademicYears();
+
+        return null;
+    }
+
+    @Transactional
+    @Override
+    public List<AcademicYear> editAcademicYearByName(Long schoolId, String currentName, AcademicYear updatedAcademicYear) {
 //        School existingSchool = schoolRepository.findById(schoolId)
 //                .orElseThrow(() -> new RuntimeException("School not found"));
 //
-//        UUID classUuid;
-//        UUID subjectUuid;
-//
-//        try {
-//            classUuid = UUID.fromString(classId);
-//            subjectUuid = UUID.fromString(subjectId);
-//        } catch (IllegalArgumentException e) {
-//            throw new RuntimeException("Invalid UUID format", e);
-//        }
-//
-//       boolean isPresent = existingSchool.getSubjects().stream()
-//                .anyMatch(subject -> subject.getSubjectId().equals(subjectUuid))
-//                ;
-//
-//        if (!isPresent) {
-//            throw new RuntimeException("Invalid subject ID: " + subjectId);
-//        }
-//
-//        existingSchool.getSchoolClass().stream()
-//                .filter(sc -> sc.getSchoolClassId().equals(classUuid))
-//                .findFirst()
-//                .orElseThrow(() -> new RuntimeException("Class not found"))
-//                .getSubjects().add(subjectUuid)
-//        ;
-//
-//        schoolRepository.save(existingSchool);
-//
-//        return "Subject with id:: "+ subjectId + " is successfully added to class with id:: "+ classId;
-//    }
-//
-//
-//    @Transactional
-//    @Override
-//    public List<Department> addDepartment(Long schoolId, List<Department> departmentList) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new RuntimeException("School not found"));
-//
-//        existingSchool.getDepartments().addAll(departmentList);
-//        schoolRepository.save(existingSchool);
-//
-//        return existingSchool.getDepartments();
-//    }
-//
-//    @Override
-//    public List<Department> getDepartmentsBySchool(Long schoolId) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        return existingSchool.getDepartments();
-//    }
-//
-//    @Override
-//    public Department getDepartmentsBySchool(Long schoolId, String deptName) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        return existingSchool.getDepartments().stream().filter(d -> deptName.equalsIgnoreCase(d.getName())).findFirst().orElseThrow(() -> new DepartmentNotFound("Department "+deptName+" not found"));
-//    }
-//
-//    @Transactional
-//    @Override
-//    public List<Department> editDepartmentByName(Long schoolId, String currentName, Department updatedDepartment) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new RuntimeException("School not found"));
-//
-//        for (Department department : existingSchool.getDepartments()) {
-//            if (department.getName().equals(currentName)) {
-//                copyNonNullProperties(updatedDepartment, department);
+//        for (AcademicYear academicYear : existingSchool.getAcademicYears()) {
+//            if (academicYear.getName().equals(currentName)) {
+//                copyNonNullProperties(updatedAcademicYear, academicYear);
 //                break;
 //            }
 //        }
 //
 //        schoolRepository.save(existingSchool);
-//        return existingSchool.getDepartments();
-//    }
+//        return existingSchool.getAcademicYears();
 //
-//    @Transactional
-//    @Override
-//    public List<Department> removeDepartmentByName(Long schoolId, String name) {
+        return null;
+    }
+
+    @Transactional
+    @Override
+    public List<AcademicYear> removeAcademicYearByName(Long schoolId, String name) {
 //        School existingSchool = schoolRepository.findById(schoolId)
 //                .orElseThrow(() -> new RuntimeException("School not found"));
 //
-//        existingSchool.getDepartments().removeIf(department -> department.getName().equals(name));
+//        existingSchool.getAcademicYears().removeIf(academicYear -> academicYear.getName().equals(name));
 //        schoolRepository.save(existingSchool);
 //
-//        return existingSchool.getDepartments();
-//    }
-//
-//
-//
-//    private SchoolClass mapToSchoolCLass(SchoolClassRequest schoolClassRequest){
-//        UUID levelUuid;
-//
-//        try {
-//            levelUuid = UUID.fromString(schoolClassRequest.getLevelId());
-//        } catch (IllegalArgumentException e) {
-//            throw new RuntimeException("Invalid UUID format", e);
-//        }
-//        return SchoolClass.builder()
-//                .name(schoolClassRequest.getName())
-//                .description(schoolClassRequest.getDescription())
-//                .schoolClassId(UUID.randomUUID())
-//                .levelId(levelUuid)
-//                .build();
-//    }
-//    @Transactional
-//    @Override
-//    public List<SchoolClass> addSchoolClass(Long schoolId, List<SchoolClassRequest> schoolClassList) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new RuntimeException("School not found"));
-//
-//        List<SchoolClass> schoolClasses = schoolClassList.stream()
-//                .map(this::mapToSchoolCLass)
-//                .peek(schoolClass -> {
-//                    schoolClass.setSchool(existingSchool); // Set the actual School object
-//                })
-//                .toList();
-//
-//        schoolClasses.forEach(schoolClass -> {
-//            existingSchool.getSchoolClass().add(schoolClass);
-//        });
-//
-//
-//        return schoolRepository.save(existingSchool).getSchoolClass();
-//    }
-//
-//    @Transactional
-//    @Override
-//    public List<SchoolClass> editSchoolClassByName(Long schoolId, String currentName, SchoolClass updatedSchoolClass) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() ->  new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        for (SchoolClass schoolClass : existingSchool.getSchoolClass()) {
-//            if (schoolClass.getName().equals(currentName)) {
-//                copyNonNullProperties(updatedSchoolClass, schoolClass);
-//                break;
-//            }
-//        }
-//
-//        schoolRepository.save(existingSchool);
-//        return existingSchool.getSchoolClass();
-//    }
-//
-//
-//    @Override
-//    public SchoolClass gettSchoolClassByName(Long schoolId, String name) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() ->  new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        return existingSchool.getSchoolClass().stream().filter(c -> name.equalsIgnoreCase(c.getName())).findFirst().orElseThrow(() -> new EntityNotFoundException("Class "+name+" not found"));
-//    }
-//
-//
-//    @Transactional
-//    @Override
-//    public List<SchoolClass> removeSchoolClassByName(Long schoolId, String name) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        existingSchool.getSchoolClass().removeIf(schoolClass -> schoolClass.getName().equals(name));
-//        schoolRepository.save(existingSchool);
-//
-//        return existingSchool.getSchoolClass();
-//    }
-//
-//
-//    @Transactional
-//    @Override
-//    public List<LevelGrade> addLevelGrade(Long schoolId, LevelGradeRequest request) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        validateGradingScales(request.getGradingScales());
-//
-//        LevelGrade levelGrade = new LevelGrade();
-//        levelGrade.setName(request.getName());
-//        levelGrade.setDescription(request.getDescription());
-//        levelGrade.setGradingScales(request.getGradingScales());
-//        levelGrade.setSchool(existingSchool);
-//
-//        existingSchool.getLevelGrade().add(levelGrade);
-//        schoolRepository.save(existingSchool);
-//
-//        return existingSchool.getLevelGrade();
-//    }
-//
-//    private void validateGradingScales(List<GradingScale> gradingScales) {
-//        gradingScales.sort(Comparator.comparingDouble(GradingScale::getMinScore));
-//
-//        for (int i = 0; i < gradingScales.size() - 1; i++) {
-//            GradingScale current = gradingScales.get(i);
-//            GradingScale next = gradingScales.get(i + 1);
-//
-//            if (current.getMaxScore() > next.getMinScore()) {
-//                throw new IllegalArgumentException("Grading scales overlap between "
-//                        + current.getGrade() + " and " + next.getGrade());
-//            }
-//        }
-//
-//        Set<String> grades = new HashSet<>();
-//        for (GradingScale scale : gradingScales) {
-//            if (!grades.add(scale.getGrade())) {
-//                throw new IllegalArgumentException("Duplicate grade: " + scale.getGrade());
-//            }
-//        }
-//    }
-//
-//
-//    @Transactional
-//    @Override
-//    public List<LevelGrade> editLevelGradeByName(Long schoolId, String currentName, LevelGrade updatedLevelGrade) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        for (LevelGrade levelGrade : existingSchool.getLevelGrade()) {
-//            if (levelGrade.getName().equals(currentName)) {
-//                copyNonNullProperties(updatedLevelGrade, levelGrade);
-//                break;
-//            }
-//        }
-//
-//        schoolRepository.save(existingSchool);
-//        return existingSchool.getLevelGrade();
-//    }
-//
-//    @Transactional
-//    @Override
-//    public List<LevelGrade> removeLevelGradeByName(Long schoolId, String name) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        existingSchool.getLevelGrade().removeIf(levelGrade -> levelGrade.getName().equals(name));
-//        schoolRepository.save(existingSchool);
-//
-//        return existingSchool.getLevelGrade();
-//    }
-//
-//
-//    @Transactional
-//    @Override
-//    public List<Subjects> addSubject(Long schoolId, List<Subjects> subjectList) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        existingSchool.getSubjects().addAll(subjectList);
-//        schoolRepository.save(existingSchool);
-//
-//        return existingSchool.getSubjects();
-//    }
-//
-//    @Transactional
-//    @Override
-//    public List<Subjects> editSubjectByName(Long schoolId, String currentName, Subjects updatedSubject) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        for (Subjects subject : existingSchool.getSubjects()) {
-//            if (subject.getSubjectName().equals(currentName)) {
-//                copyNonNullProperties(updatedSubject, subject);
-//                break;
-//            }
-//        }
-//
-//        schoolRepository.save(existingSchool);
-//        return existingSchool.getSubjects();
-//    }
-//
-//    @Override
-//    public Subjects getSubjectByName(Long schoolId, String name) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        return existingSchool.getSubjects().stream().filter(s -> name.equalsIgnoreCase(s.getSubjectName())).findFirst().orElseThrow(() -> new SubjectNotFoundException("Subject "+ name+" not found!"));
-//    }
-//
-//    @Override
-//    public List<Subjects> getAllSubjectsBySchool(Long schoolId) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        return existingSchool.getSubjects();
-//    }
-//
-//
-//    @Transactional
-//    @Override
-//    public List<Subjects> removeSubjectByName(Long schoolId, String name) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        existingSchool.getSubjects().removeIf(subject -> subject.getSubjectName().equals(name));
-//        schoolRepository.save(existingSchool);
-//
-//        return existingSchool.getSubjects();
-//    }
-//
-//
-//    @Transactional
-//    @Override
-//    public List<SchoolTerm> addSchoolTerm(Long schoolId, List<SchoolTerm> schoolTermList) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        existingSchool.getSchoolTerms().addAll(schoolTermList);
-//        schoolRepository.save(existingSchool);
-//
-//        return existingSchool.getSchoolTerms();
-//    }
-//
-//    @Override
-//    public List<SchoolTerm> getSchoolAllSchoolTerms(Long schoolId) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        return existingSchool.getSchoolTerms();
-//    }
-//
-//    @Override
-//    public SchoolTerm getSchoolAllSchoolTermByName(Long schoolId, String termName) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        return existingSchool.getSchoolTerms().stream().filter(e -> termName.equalsIgnoreCase(e.getName())).findFirst().orElseThrow(() -> new TermNotFoundException("Term "+termName+" not found."));
-//    }
-//
-//    @Transactional
-//    @Override
-//    public List<SchoolTerm> editSchoolTermByName(Long schoolId, String currentName, SchoolTerm updatedSchoolTerm) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        for (SchoolTerm schoolTerm : existingSchool.getSchoolTerms()) {
-//            if (schoolTerm.getName().equals(currentName)) {
-//                copyNonNullProperties(updatedSchoolTerm, schoolTerm);
-//                break;
-//            }
-//        }
-//
-//        schoolRepository.save(existingSchool);
-//        return existingSchool.getSchoolTerms();
-//    }
-//
-//    @Transactional
-//    @Override
-//    public List<SchoolTerm> removeSchoolTermByName(Long schoolId, String name) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        existingSchool.getSchoolTerms().removeIf(schoolTerm -> schoolTerm.getName().equals(name));
-//        schoolRepository.save(existingSchool);
-//
-//        return existingSchool.getSchoolTerms();
-//    }
-//
-//    @Transactional
-//    @Override
-//    public List<AcademicYear> addAcademicYear(Long schoolId, List<AcademicYear> academicYearList) {
-////        School existingSchool = schoolRepository.findById(schoolId)
-////                .orElseThrow(() -> new RuntimeException("School not found"));
-////
-////        existingSchool.getAcademicYears().addAll(academicYearList);
-////        schoolRepository.save(existingSchool);
-////
-////        return existingSchool.getAcademicYears();
-//
-//        return null;
-//    }
-//
-//    @Transactional
-//    @Override
-//    public List<AcademicYear> editAcademicYearByName(Long schoolId, String currentName, AcademicYear updatedAcademicYear) {
-////        School existingSchool = schoolRepository.findById(schoolId)
-////                .orElseThrow(() -> new RuntimeException("School not found"));
-////
-////        for (AcademicYear academicYear : existingSchool.getAcademicYears()) {
-////            if (academicYear.getName().equals(currentName)) {
-////                copyNonNullProperties(updatedAcademicYear, academicYear);
-////                break;
-////            }
-////        }
-////
-////        schoolRepository.save(existingSchool);
-////        return existingSchool.getAcademicYears();
-//
-//        return null;
-//    }
-//
-//    @Transactional
-//    @Override
-//    public List<AcademicYear> removeAcademicYearByName(Long schoolId, String name) {
-////        School existingSchool = schoolRepository.findById(schoolId)
-////                .orElseThrow(() -> new RuntimeException("School not found"));
-////
-////        existingSchool.getAcademicYears().removeIf(academicYear -> academicYear.getName().equals(name));
-////        schoolRepository.save(existingSchool);
-////
-////        return existingSchool.getAcademicYears();
-//        return null;
-//    }
-//
-//    @Override
-//    public boolean existsBySubjectIdAndClassId(Long schoolId, UUID classId, UUID subjectId, UUID lvl, UUID term) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        // Check if the classId exists in the school's classes
-////        boolean classExists = existingSchool.getClasses().stream()
-////                .anyMatch(schoolClass -> schoolClass.getId().equals(classId));
-//
-//        boolean classExists = existingSchool.getSchoolClass().stream()
-//                .map(SchoolClass::getSchoolClassId)
-//
-//                .anyMatch(class_id -> class_id.equals(classId));
-//      //  System.out.println("class:: "+ classExists);
-//        // Check if the subjectId exists in the school's subjects
-////        boolean subjectExists = existingSchool.getSubjects().stream()
-////                .anyMatch(subject -> subject.getSubjectId().equals(subjectId));
-//
-////        existingSchool.getSubjects().stream()
-////                .map(Subjects::getSubjectId)
-////                .forEach(System.out::println);
+//        return existingSchool.getAcademicYears();
+        return null;
+    }
+
+    @Override
+    public boolean existsBySubjectIdAndClassId(Long schoolId, UUID classId, UUID subjectId, UUID lvl, UUID term) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        // Check if the classId exists in the school's classes
+//        boolean classExists = existingSchool.getClasses().stream()
+//                .anyMatch(schoolClass -> schoolClass.getId().equals(classId));
+
+        boolean classExists = existingSchool.getSchoolClass().stream()
+                .map(SchoolClass::getSchoolClassId)
+
+                .anyMatch(class_id -> class_id.equals(classId));
+      //  System.out.println("class:: "+ classExists);
+        // Check if the subjectId exists in the school's subjects
 //        boolean subjectExists = existingSchool.getSubjects().stream()
+//                .anyMatch(subject -> subject.getSubjectId().equals(subjectId));
+
+//        existingSchool.getSubjects().stream()
 //                .map(Subjects::getSubjectId)
-//
-//                .anyMatch(subject_id -> subject_id.equals(subjectId));
-//
-//        // existingSchool.getLevelGrade().stream().filter(level -> levelUuid.equals(level.getLevelGradeId()))
-//        boolean levelExists = existingSchool.getLevelGrade().stream()
-//                .map(LevelGrade::getLevelGradeId)
-//                .anyMatch(level -> level.equals(lvl));
-//
-//       // System.out.println(existingSchool.getLevelGrade());
-//
-//        boolean termExists = existingSchool.getSchoolTerms().stream()
-//                .map(SchoolTerm::getSchoolTermId)
-//                .anyMatch(t -> t.equals(term));
-//
-//      //  System.out.println("subject:: "+ subjectExists);
-//        // Return true only if both the class and subject exist
-//        System.out.println(levelExists);
-//        System.out.println(termExists);
-//        System.out.println(subjectExists);
-//        System.out.println(classExists);
-//        return classExists && subjectExists && levelExists && termExists;
-//    }
-//
-//    @Override
-//    public boolean existsByDepartmentId(Long schoolId, UUID departmentId) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        // Check if the classId exists in the school's classes
-//        // Return true only if both the class and subject exist
-//        return existingSchool.getDepartments().stream()
-//                .anyMatch(department -> department.getDepartmentId().equals(departmentId));
-//    }
-//
-//    @Override
-//    public boolean existsByClassId(Long schoolId, String classId, String levelId) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        UUID classUuid;
-//        UUID levelUuid;
-//
-//        try {
-//            classUuid = UUID.fromString(classId);
-//            levelUuid = UUID.fromString(levelId);
-//        } catch (IllegalArgumentException e) {
-//            throw new InvalidUUIDException("Invalid UUID format");
-//        }
-//
-//        boolean classExists = existingSchool.getSchoolClass().stream()
-//                .map(SchoolClass::getSchoolClassId)
-//                .anyMatch(classUuid::equals);
-//
-//        boolean levelExists = existingSchool.getLevelGrade().stream()
-//                .map(LevelGrade::getLevelGradeId)
-//                .anyMatch(levelUuid::equals);
-//
-//        return classExists && levelExists;
-//    }
-//
-//    @Override
-//    public boolean existsByTermId(Long schoolId, String termId) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        UUID termUuid;
-//
-//        try {
-//          termUuid = UUID.fromString(termId);
-//        } catch (IllegalArgumentException e) {
-//            throw new InvalidUUIDException("Invalid UUID format");
-//        }
-//        return existingSchool.getSchoolTerms().stream()
-//                .anyMatch(term -> term.getSchoolTermId().equals(termUuid));
-//
-//    }
-//
-//    @Override
-//    public String getGradingScale(Long schoolId, UUID levelUuid, Double score) {
-//        School existingSchool = schoolRepository.findById(schoolId)
-//                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
-//
-//        LevelGrade levelGrade = existingSchool.getLevelGrade().stream().filter(level -> levelUuid.equals(level.getLevelGradeId()))
-//                .findAny()
-//                .orElseThrow(() -> new LevelNotFoundException("Level with the specified id not found"));
-//
-//
-//        return levelGrade.getGradingScales()
-//                .stream()
-//                .filter(scale -> score >= scale.getMinScore() && score <= scale.getMaxScore())
-//                .map(GradingScale::getGrade)
-//                .findFirst()
-//                .orElse("F");
-//    }
-//
-//    public void copyNonNullProperties(Object source, Object target) {
-//        BeanWrapper src = new BeanWrapperImpl(source);
-//        Set<String> ignoreSet = new HashSet<>();
-//
-//        for (java.beans.PropertyDescriptor pd : src.getPropertyDescriptors()) {
-//            Object srcValue = src.getPropertyValue(pd.getName());
-//            if (srcValue == null) {
-//                ignoreSet.add(pd.getName());
-//            }
-//            System.out.println("source:: "+ srcValue);
-//        }
-//
-//        // Add fields to ignore regardless of their value
-//        ignoreSet.add("departments");
-//        ignoreSet.add("schoolClass");
-//        ignoreSet.add("levelGrade");
-//        ignoreSet.add("subjects");
-//        ignoreSet.add("schoolTerms");
-//        ignoreSet.add("academicYears");
-//
-//
-//
-//        BeanUtils.copyProperties(source, target, ignoreSet.toArray(new String[0]));
-//    }
-//
-//
-//
-//
-//    // Method to find level ID by school ID and level name
-////    public UUID findLevelId(Long schoolId, String levelName) {
-////        School school = schoolRepository.findById(schoolId)
-////                .orElseThrow(() -> new SchoolNotFoundException("School with id " + schoolId + " not found"));
-////
-////        System.out.println("This is the level name" + levelName);
-////
-////        return school.getLevelGrade().stream()
-////                .filter(level -> levelName.equals(level.getName()))
-////                .map(LevelGrade::getLevelGradeId)
-////                .findFirst()
-////                .orElseThrow(() -> new LevelNotFoundException("Level " + levelName + " not found for schoolId: " + schoolId));
-////    }
-//
-//
+//                .forEach(System.out::println);
+        boolean subjectExists = existingSchool.getSubjects().stream()
+                .map(Subjects::getSubjectId)
+
+                .anyMatch(subject_id -> subject_id.equals(subjectId));
+
+        // existingSchool.getLevelGrade().stream().filter(level -> levelUuid.equals(level.getLevelGradeId()))
+        boolean levelExists = existingSchool.getLevelGrade().stream()
+                .map(LevelGrade::getLevelGradeId)
+                .anyMatch(level -> level.equals(lvl));
+
+       // System.out.println(existingSchool.getLevelGrade());
+
+        boolean termExists = existingSchool.getSchoolTerms().stream()
+                .map(SchoolTerm::getSchoolTermId)
+                .anyMatch(t -> t.equals(term));
+
+      //  System.out.println("subject:: "+ subjectExists);
+        // Return true only if both the class and subject exist
+        System.out.println(levelExists);
+        System.out.println(termExists);
+        System.out.println(subjectExists);
+        System.out.println(classExists);
+        return classExists && subjectExists && levelExists && termExists;
+    }
+
+    @Override
+    public boolean existsByDepartmentId(Long schoolId, UUID departmentId) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        // Check if the classId exists in the school's classes
+        // Return true only if both the class and subject exist
+        return existingSchool.getDepartments().stream()
+                .anyMatch(department -> department.getDepartmentId().equals(departmentId));
+    }
+
+    @Override
+    public boolean existsByClassId(Long schoolId, String classId, String levelId) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        UUID classUuid;
+        UUID levelUuid;
+
+        try {
+            classUuid = UUID.fromString(classId);
+            levelUuid = UUID.fromString(levelId);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidUUIDException("Invalid UUID format");
+        }
+
+        boolean classExists = existingSchool.getSchoolClass().stream()
+                .map(SchoolClass::getSchoolClassId)
+                .anyMatch(classUuid::equals);
+
+        boolean levelExists = existingSchool.getLevelGrade().stream()
+                .map(LevelGrade::getLevelGradeId)
+                .anyMatch(levelUuid::equals);
+
+        return classExists && levelExists;
+    }
+
+    @Override
+    public boolean existsByTermId(Long schoolId, String termId) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        UUID termUuid;
+
+        try {
+          termUuid = UUID.fromString(termId);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidUUIDException("Invalid UUID format");
+        }
+        return existingSchool.getSchoolTerms().stream()
+                .anyMatch(term -> term.getSchoolTermId().equals(termUuid));
+
+    }
+
+    @Override
+    public String getGradingScale(Long schoolId, UUID levelUuid, Double score) {
+        School existingSchool = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id:: "+schoolId+" not found"));
+
+        LevelGrade levelGrade = existingSchool.getLevelGrade().stream().filter(level -> levelUuid.equals(level.getLevelGradeId()))
+                .findAny()
+                .orElseThrow(() -> new LevelNotFoundException("Level with the specified id not found"));
+
+
+        return levelGrade.getGradingScales()
+                .stream()
+                .filter(scale -> score >= scale.getMinScore() && score <= scale.getMaxScore())
+                .map(GradingScale::getGrade)
+                .findFirst()
+                .orElse("F");
+    }
+
+    public void copyNonNullProperties(Object source, Object target) {
+        BeanWrapper src = new BeanWrapperImpl(source);
+        Set<String> ignoreSet = new HashSet<>();
+
+        for (java.beans.PropertyDescriptor pd : src.getPropertyDescriptors()) {
+            Object srcValue = src.getPropertyValue(pd.getName());
+            if (srcValue == null) {
+                ignoreSet.add(pd.getName());
+            }
+            System.out.println("source:: "+ srcValue);
+        }
+
+        // Add fields to ignore regardless of their value
+        ignoreSet.add("departments");
+        ignoreSet.add("schoolClass");
+        ignoreSet.add("levelGrade");
+        ignoreSet.add("subjects");
+        ignoreSet.add("schoolTerms");
+        ignoreSet.add("academicYears");
+
+
+
+        BeanUtils.copyProperties(source, target, ignoreSet.toArray(new String[0]));
+    }
+
+
+
+
+    // Method to find level ID by school ID and level name
 //    public UUID findLevelId(Long schoolId, String levelName) {
-//        String jpql = "SELECT new LevelIdRequest(lg.levelGradeId) FROM LevelGrade lg WHERE lg.school.id = :schoolId AND lg.name = :levelName";
-//        LevelIdRequest levelIdRequest = entityManager.createQuery(jpql, LevelIdRequest.class)
-//                .setParameter("schoolId", schoolId)
-//                .setParameter("levelName", levelName)
-//                .getSingleResult();
-//
-//        return levelIdRequest.getLevelGradeId();
-//    }
-//
-//    // Method to find class ID by school ID, class name, and level ID
-//    public UUID findClassId(Long schoolId, String className, UUID levelId) throws ClassNotFoundException {
 //        School school = schoolRepository.findById(schoolId)
 //                .orElseThrow(() -> new SchoolNotFoundException("School with id " + schoolId + " not found"));
 //
-//        return school.getSchoolClass().stream()
-//                .filter(clazz -> className.equals(clazz.getName()) && levelId.equals(clazz.getLevelId())) // Assuming LevelID is part of SchoolClass
-//                .map(SchoolClass::getSchoolClassId)
+//        System.out.println("This is the level name" + levelName);
+//
+//        return school.getLevelGrade().stream()
+//                .filter(level -> levelName.equals(level.getName()))
+//                .map(LevelGrade::getLevelGradeId)
 //                .findFirst()
-//                .orElseThrow(() -> new ClassNotFoundException("Class " + className + " not found for levelId: " + levelId));
+//                .orElseThrow(() -> new LevelNotFoundException("Level " + levelName + " not found for schoolId: " + schoolId));
 //    }
+
+
+    public UUID findLevelId(Long schoolId, String levelName) {
+        String jpql = "SELECT new LevelIdRequest(lg.levelGradeId) FROM LevelGrade lg WHERE lg.school.id = :schoolId AND lg.name = :levelName";
+        LevelIdRequest levelIdRequest = entityManager.createQuery(jpql, LevelIdRequest.class)
+                .setParameter("schoolId", schoolId)
+                .setParameter("levelName", levelName)
+                .getSingleResult();
+
+        return levelIdRequest.getLevelGradeId();
+    }
+
+    // Method to find class ID by school ID, class name, and level ID
+    public UUID findClassId(Long schoolId, String className, UUID levelId) throws ClassNotFoundException {
+        School school = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new SchoolNotFoundException("School with id " + schoolId + " not found"));
+
+        return school.getSchoolClass().stream()
+                .filter(clazz -> className.equals(clazz.getName()) && levelId.equals(clazz.getLevelId())) // Assuming LevelID is part of SchoolClass
+                .map(SchoolClass::getSchoolClassId)
+                .findFirst()
+                .orElseThrow(() -> new ClassNotFoundException("Class " + className + " not found for levelId: " + levelId));
+    }
 
 
 
