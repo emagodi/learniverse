@@ -66,9 +66,6 @@ public class SchoolResponse {
     private String logoUrl;
     private Status status;
 
-    private String sender_id;
-
-
     private List<Department> departments;
 
     private List<SchoolClass> schoolClass;

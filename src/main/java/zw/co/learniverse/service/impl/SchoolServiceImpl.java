@@ -11,6 +11,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -25,19 +26,20 @@ import zw.co.learniverse.entities.*;
 import java.io.File;
 
 import zw.co.learniverse.enums.OwnershipType;
+import zw.co.learniverse.enums.Role;
 import zw.co.learniverse.enums.Status;
 import zw.co.learniverse.exception.*;
-import zw.co.learniverse.payload.request.LevelGradeRequest;
-import zw.co.learniverse.payload.request.LevelIdRequest;
-import zw.co.learniverse.payload.request.SchoolClassRequest;
-import zw.co.learniverse.payload.request.SchoolRequest;
+import zw.co.learniverse.payload.request.*;
 import zw.co.learniverse.payload.response.ClassResponse;
 import zw.co.learniverse.payload.response.SubjectResponse;
 import zw.co.learniverse.repository.SchoolClassRepository;
 import zw.co.learniverse.repository.SchoolRepository;
+import zw.co.learniverse.repository.UserRepository;
+import zw.co.learniverse.service.EmailService;
 import zw.co.learniverse.service.SchoolService;
 
 
+import java.security.SecureRandom;
 import java.time.Year;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,6 +58,10 @@ public class SchoolServiceImpl implements SchoolService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final UserRepository userRepository;
+
+    private final EmailService emailService;
+
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -63,8 +69,64 @@ public class SchoolServiceImpl implements SchoolService {
     private String uploadDir;
 
     @Override
+    @Transactional
+//    public School createSchool(SchoolRequest schoolRequest) throws IOException, java.io.IOException {
+//
+//
+//        // Create a new School object
+//        var school = School.builder()
+//                .name(schoolRequest.getName())
+//                .town(schoolRequest.getTown())
+//                .streetName(schoolRequest.getStreetName())
+//                .district(schoolRequest.getDistrict())
+//                .province(schoolRequest.getProvince())
+//                .region(schoolRequest.getRegion())
+//                .country(schoolRequest.getCountry())
+//                .schoolContact(schoolRequest.getSchoolContact())
+//                .schoolEmail(schoolRequest.getSchoolEmail())
+//                .headFirstname(schoolRequest.getHeadFirstname())
+//                .headLastname(schoolRequest.getHeadLastname())
+//                .headEmail(schoolRequest.getHeadEmail())
+//                .headPhonenumber(schoolRequest.getHeadPhonenumber())
+//                .adminFirstname(schoolRequest.getAdminFirstname())
+//                .adminLastName(schoolRequest.getAdminLastName())
+//                .adminEmail(schoolRequest.getAdminEmail())
+//                .adminPhonenumber(schoolRequest.getAdminPhonenumber())
+//                .numberOfStudents(schoolRequest.getNumberOfStudents())
+//                .numberOfTeachers(schoolRequest.getNumberOfTeachers())
+//                .adminNote(schoolRequest.getAdminNote())
+//                .responsibleAuthority(schoolRequest.getResponsibleAuthority())
+//                .ownershipType(schoolRequest.getOwnershipType())
+//                .status(schoolRequest.getStatus())
+//                .paymentReferenceNumber(schoolRequest.getPaymentReferenceNumber())
+//                .paymentMethod(schoolRequest.getPaymentMethod())
+//                .adminPassword(passwordEncoder.encode(schoolRequest.getAdminPassword())) // Hash password
+//                .build();
+//
+//        // Handle logo upload
+//        if (schoolRequest.getLogo() != null && !schoolRequest.getLogo().isEmpty()) {
+//            MultipartFile logoFile = schoolRequest.getLogo();
+//            String logoUrl = uploadFileToLocalFolder(logoFile, "logos");
+//            school.setLogo(logoUrl); // Set the logo URL
+//        }
+//
+//        // Handle receipt upload
+//        if (schoolRequest.getReceipt() != null && !schoolRequest.getReceipt().isEmpty()) {
+//            MultipartFile receiptFile = schoolRequest.getReceipt();
+//            String receiptUrl = uploadFileToLocalFolder(receiptFile, "receipts");
+//            school.setReceipt(receiptUrl); // Set the receipt URL
+//        }
+//
+//        // Save the school entity to the repository and return it
+//        return schoolRepository.save(school);
+//    }
+
+
+
     public School createSchool(SchoolRequest schoolRequest) throws IOException, java.io.IOException {
 
+        // Generate a random password
+        String generatedPassword = generateRandomPassword(12); // Adjust length as needed
 
         // Create a new School object
         var school = School.builder()
@@ -93,7 +155,6 @@ public class SchoolServiceImpl implements SchoolService {
                 .status(schoolRequest.getStatus())
                 .paymentReferenceNumber(schoolRequest.getPaymentReferenceNumber())
                 .paymentMethod(schoolRequest.getPaymentMethod())
-                .adminPassword(passwordEncoder.encode(schoolRequest.getAdminPassword())) // Hash password
                 .build();
 
         // Handle logo upload
@@ -110,9 +171,44 @@ public class SchoolServiceImpl implements SchoolService {
             school.setReceipt(receiptUrl); // Set the receipt URL
         }
 
-        // Save the school entity to the repository and return it
-        return schoolRepository.save(school);
+        // Save the school entity to the repository
+        School savedSchool = schoolRepository.save(school);
+
+        // Create the admin user
+        User adminUser = User.builder()
+                .firstname(schoolRequest.getAdminFirstname())
+                .lastname(schoolRequest.getAdminLastName())
+                .email(schoolRequest.getAdminEmail())
+                .password(passwordEncoder.encode(generatedPassword)) // Hash password
+                .role(Role.ADMIN) // Set the appropriate role
+                .schoolId(savedSchool.getId()) // Set the school ID
+                .temporaryPassword(false) // Set if needed
+                .build();
+
+        try {
+            // Save the admin user
+            userRepository.save(adminUser);
+        } catch (DataIntegrityViolationException e) {
+            // Handle duplicate email error
+            throw new DuplicateEmailException("Email already exists: " + adminUser.getEmail());
+        }
+
+        System.out.println("This is the PASSWORD : " + generatedPassword);
+
+        // Prepare email content
+        String subject = "Your Account Has Been Created";
+        String body = "Your account has been successfully created. Your password is: " + generatedPassword;
+
+        // Create a MailBody object
+        MailBody mailBody = new MailBody(adminUser.getEmail(), subject, body);
+
+        // Send email with the generated password
+        emailService.sendSimpleMessage(mailBody);
+
+        // Return the saved school
+        return savedSchool;
     }
+
 
     private String uploadFileToLocalFolder(MultipartFile file, String folder) throws IOException, java.io.IOException {
         // Check if the file is null or empty
@@ -142,6 +238,19 @@ public class SchoolServiceImpl implements SchoolService {
 
         // Return the URL where the file can be accessed
         return uploadDir + "/" + folder + "/" + filename; // Adjust as needed
+    }
+
+    private String generateRandomPassword(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+";
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(characters.length());
+            password.append(characters.charAt(index));
+        }
+
+        return password.toString();
     }
 
 //    @Override

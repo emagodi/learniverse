@@ -63,7 +63,6 @@ public class SchoolRequest {
     @Schema(description = "School logo", type = "string", format = "binary")
     private MultipartFile logo;
 
-    private String adminPassword;
 
 
 }

@@ -45,8 +45,6 @@ public class School extends BaseEntity {
     private String adminEmail;
     private String adminPhonenumber;
 
-    private String adminPassword;
-
     private Integer numberOfStudents;
     private Integer numberOfTeachers;
     private String adminNote;

@@ -84,19 +84,31 @@ public class GlobalExceptionHandler {
                 .body(exp.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgException(MethodArgumentNotValidException exp){
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity<ErrorResponse> handleMethodArgException(MethodArgumentNotValidException exp){
+//
+//        var errors = new HashMap<String, String >();
+//        exp.getBindingResult().getAllErrors()
+//                .forEach(error -> {
+//                    var fieldName = ((FieldError)error).getField();
+//                    var errorMessage = error.getDefaultMessage();
+//
+//                    errors.put(fieldName, errorMessage);
+//                });
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(new ErrorResponse(errors));
+//    }
 
-        var errors = new HashMap<String, String >();
-        exp.getBindingResult().getAllErrors()
-                .forEach(error -> {
-                    var fieldName = ((FieldError)error).getField();
-                    var errorMessage = error.getDefaultMessage();
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateEmailException(DuplicateEmailException ex) {
+        // Log only the message if needed
+        System.out.println("Duplicate entry: " + ex.getMessage());
 
-                    errors.put(fieldName, errorMessage);
-                });
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(errors));
+        // Create the error response
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+
 }
