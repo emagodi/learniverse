@@ -70,59 +70,6 @@ public class SchoolServiceImpl implements SchoolService {
 
     @Override
     @Transactional
-//    public School createSchool(SchoolRequest schoolRequest) throws IOException, java.io.IOException {
-//
-//
-//        // Create a new School object
-//        var school = School.builder()
-//                .name(schoolRequest.getName())
-//                .town(schoolRequest.getTown())
-//                .streetName(schoolRequest.getStreetName())
-//                .district(schoolRequest.getDistrict())
-//                .province(schoolRequest.getProvince())
-//                .region(schoolRequest.getRegion())
-//                .country(schoolRequest.getCountry())
-//                .schoolContact(schoolRequest.getSchoolContact())
-//                .schoolEmail(schoolRequest.getSchoolEmail())
-//                .headFirstname(schoolRequest.getHeadFirstname())
-//                .headLastname(schoolRequest.getHeadLastname())
-//                .headEmail(schoolRequest.getHeadEmail())
-//                .headPhonenumber(schoolRequest.getHeadPhonenumber())
-//                .adminFirstname(schoolRequest.getAdminFirstname())
-//                .adminLastName(schoolRequest.getAdminLastName())
-//                .adminEmail(schoolRequest.getAdminEmail())
-//                .adminPhonenumber(schoolRequest.getAdminPhonenumber())
-//                .numberOfStudents(schoolRequest.getNumberOfStudents())
-//                .numberOfTeachers(schoolRequest.getNumberOfTeachers())
-//                .adminNote(schoolRequest.getAdminNote())
-//                .responsibleAuthority(schoolRequest.getResponsibleAuthority())
-//                .ownershipType(schoolRequest.getOwnershipType())
-//                .status(schoolRequest.getStatus())
-//                .paymentReferenceNumber(schoolRequest.getPaymentReferenceNumber())
-//                .paymentMethod(schoolRequest.getPaymentMethod())
-//                .adminPassword(passwordEncoder.encode(schoolRequest.getAdminPassword())) // Hash password
-//                .build();
-//
-//        // Handle logo upload
-//        if (schoolRequest.getLogo() != null && !schoolRequest.getLogo().isEmpty()) {
-//            MultipartFile logoFile = schoolRequest.getLogo();
-//            String logoUrl = uploadFileToLocalFolder(logoFile, "logos");
-//            school.setLogo(logoUrl); // Set the logo URL
-//        }
-//
-//        // Handle receipt upload
-//        if (schoolRequest.getReceipt() != null && !schoolRequest.getReceipt().isEmpty()) {
-//            MultipartFile receiptFile = schoolRequest.getReceipt();
-//            String receiptUrl = uploadFileToLocalFolder(receiptFile, "receipts");
-//            school.setReceipt(receiptUrl); // Set the receipt URL
-//        }
-//
-//        // Save the school entity to the repository and return it
-//        return schoolRepository.save(school);
-//    }
-
-
-
     public School createSchool(SchoolRequest schoolRequest) throws IOException, java.io.IOException {
 
         // Generate a random password
